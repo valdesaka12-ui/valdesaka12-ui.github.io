@@ -1,0 +1,1511 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>IMPERATOR Ressources SA – Gestion Rotation</title>
+<meta name="theme-color" content="#1a1a2e">
+<link rel="manifest" href="#"/>
+<style>
+  /* ===== RESET & BASE ===== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --primary: #2e7d32;
+    --primary-light: #4caf50;
+    --accent: #ffd600;
+    --danger: #c62828;
+    --bg-dark: #0d1117;
+    --bg-card: rgba(255,255,255,0.10);
+    --bg-card-solid: #fff;
+    --text-main: #1a1a1a;
+    --text-light: #fff;
+    --shadow: 0 8px 32px rgba(0,0,0,0.35);
+    --radius: 16px;
+    --blur: blur(18px);
+  }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    min-height: 100vh;
+    background: #0d1117;
+    color: var(--text-main);
+    overflow-x: hidden;
+    position: relative;
+  }
+
+  /* ===== GLOBAL BACKGROUND ===== */
+  .global-bg {
+    position: fixed; inset: 0; z-index: 0;
+    background: linear-gradient(135deg, #1a2a1a 0%, #0d2818 40%, #1a1a0d 70%, #0d1117 100%);
+    overflow: hidden;
+  }
+  .global-bg::before {
+    content: '';
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 80% 60% at 20% 30%, rgba(46,125,50,0.25) 0%, transparent 60%),
+      radial-gradient(ellipse 60% 80% at 80% 70%, rgba(255,214,0,0.10) 0%, transparent 60%),
+      url("data:image/svg+xml,%3Csvg xmlns='[w3.org](http://www.w3.org/2000/svg)' width='400' height='400'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='400' height='400' filter='url(%23n)' opacity='0.06'/%3E%3C/svg%3E");
+    filter: blur(2px);
+  }
+  .global-bg::after {
+    content: '';
+    position: absolute; inset: 0;
+    backdrop-filter: blur(0px);
+    background: rgba(0,0,0,0.38);
+  }
+
+  /* ===== PAGES ===== */
+  .page {
+    display: none;
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    flex-direction: column;
+    animation: fadeInPage 0.4s ease;
+  }
+  .page.active { display: flex; }
+  @keyframes fadeInPage { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: none; } }
+
+  /* ===== SPLASH ===== */
+  #splash {
+    align-items: center; justify-content: center;
+    background: transparent;
+    text-align: center;
+  }
+  .splash-inner {
+    display: flex; flex-direction: column; align-items: center; gap: 28px;
+    animation: splashFade 3.2s ease forwards;
+  }
+  @keyframes splashFade {
+    0% { opacity: 0; transform: scale(0.92); }
+    18% { opacity: 1; transform: scale(1); }
+    80% { opacity: 1; }
+    100% { opacity: 0; }
+  }
+  .splash-logo-ring {
+    width: 120px; height: 120px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #2e7d32, #ffd600);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 60px rgba(46,125,50,0.7), 0 0 120px rgba(255,214,0,0.2);
+    font-size: 2.5rem; font-weight: 900; color: #fff;
+    letter-spacing: 1px;
+  }
+  .splash-brand {
+    font-size: 2rem; font-weight: 900; color: #fff;
+    letter-spacing: 6px; text-transform: uppercase;
+    text-shadow: 0 0 30px rgba(255,214,0,0.6);
+  }
+  .splash-sub {
+    font-size: 0.85rem; color: rgba(255,255,255,0.6); letter-spacing: 3px;
+  }
+  .splash-home-btn {
+    position: fixed; top: 18px; left: 18px; z-index: 999;
+    background: rgba(255,255,255,0.12);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: #fff; border-radius: 50%;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1.2rem;
+    backdrop-filter: blur(10px);
+    transition: background 0.2s;
+  }
+  .splash-home-btn:hover { background: rgba(46,125,50,0.4); }
+
+  /* ===== HEADER ===== */
+  .app-header {
+    background: rgba(0,0,0,0.55);
+    backdrop-filter: blur(16px);
+    padding: 14px 18px 10px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    position: sticky; top: 0; z-index: 100;
+  }
+  .header-logo {
+    display: flex; align-items: center; gap: 10px;
+  }
+  .header-logo-icon {
+    width: 38px; height: 38px; border-radius: 50%;
+    background: linear-gradient(135deg, #2e7d32, #ffd600);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 900; color: #fff; font-size: 0.85rem;
+    box-shadow: 0 2px 12px rgba(46,125,50,0.5);
+  }
+  .header-title {
+    font-size: 0.78rem; font-weight: 700; color: #fff;
+    line-height: 1.2;
+  }
+  .header-title span { color: var(--accent); display: block; font-size: 0.68rem; font-weight: 400; }
+  .header-actions { display: flex; gap: 8px; }
+  .icon-btn {
+    background: rgba(255,255,255,0.10);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; border-radius: 50%;
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1rem;
+    transition: background 0.2s, transform 0.15s;
+  }
+  .icon-btn:hover { background: rgba(46,125,50,0.4); transform: scale(1.08); }
+  .icon-btn.danger { background: rgba(198,40,40,0.2); border-color: rgba(198,40,40,0.4); }
+  .icon-btn.danger:hover { background: rgba(198,40,40,0.5); }
+
+  /* ===== WELCOME SCREEN (after splash) ===== */
+  #welcome {
+    align-items: center; justify-content: flex-start;
+    padding-top: 0;
+  }
+  .welcome-header { width: 100%; }
+  .welcome-body {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    padding: 32px 24px 100px;
+    text-align: center;
+    gap: 32px;
+  }
+  .welcome-logo-ring {
+    width: 90px; height: 90px; border-radius: 50%;
+    background: linear-gradient(135deg, #2e7d32, #ffd600);
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 40px rgba(46,125,50,0.5);
+    font-size: 1.5rem; font-weight: 900; color: #fff;
+  }
+  .welcome-title {
+    font-size: 1.1rem; font-weight: 800; color: #fff;
+    line-height: 1.5; text-shadow: 0 2px 12px rgba(0,0,0,0.5);
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .welcome-title em {
+    color: var(--accent); font-style: normal;
+    display: block; margin-top: 6px; font-size: 0.8rem; letter-spacing: 2px;
+  }
+  .auth-btns { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 320px; }
+  .btn {
+    width: 100%; padding: 15px 20px;
+    border-radius: 14px; border: none;
+    font-size: 1rem; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    gap: 10px; transition: all 0.22s; letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+    color: #fff; box-shadow: 0 6px 24px rgba(46,125,50,0.45);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(46,125,50,0.6); }
+  .btn-outline {
+    background: rgba(255,255,255,0.08);
+    color: #fff; border: 1.5px solid rgba(255,255,255,0.25);
+    backdrop-filter: blur(8px);
+  }
+  .btn-outline:hover { background: rgba(255,255,255,0.15); transform: translateY(-2px); }
+  .btn-accent {
+    background: linear-gradient(135deg, #ffd600, #ffab00);
+    color: #1a1a1a; box-shadow: 0 6px 24px rgba(255,214,0,0.35);
+  }
+  .btn-danger {
+    background: linear-gradient(135deg, #c62828, #e53935);
+    color: #fff; box-shadow: 0 6px 20px rgba(198,40,40,0.4);
+  }
+  .btn-sm {
+    width: auto; padding: 9px 18px;
+    font-size: 0.85rem; border-radius: 10px;
+    text-transform: none; letter-spacing: 0;
+  }
+
+  /* ===== AUTH PAGES ===== */
+  #login, #register {
+    align-items: center; justify-content: flex-start;
+  }
+  .auth-container {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; padding: 28px 24px 80px;
+    gap: 20px; width: 100%; max-width: 440px; margin: 0 auto;
+  }
+  .auth-card {
+    background: rgba(255,255,255,0.09);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: var(--radius); padding: 28px 22px;
+    width: 100%; box-shadow: var(--shadow);
+  }
+  .auth-card h2 {
+    color: #fff; font-size: 1.3rem; margin-bottom: 20px;
+    display: flex; align-items: center; gap: 10px;
+  }
+
+  /* ===== FORM ELEMENTS ===== */
+  .form-group { margin-bottom: 16px; }
+  .form-group label {
+    display: block; font-size: 0.8rem; font-weight: 600;
+    color: rgba(255,255,255,0.7); margin-bottom: 6px; letter-spacing: 0.5px;
+  }
+  .form-control {
+    width: 100%; padding: 13px 16px;
+    background: rgba(255,255,255,0.08);
+    border: 1.5px solid rgba(255,255,255,0.15);
+    border-radius: 10px; color: #fff; font-size: 0.95rem;
+    outline: none; transition: border 0.2s, background 0.2s;
+    -webkit-appearance: none;
+  }
+  .form-control:focus {
+    border-color: var(--primary-light);
+    background: rgba(46,125,50,0.12);
+  }
+  .form-control::placeholder { color: rgba(255,255,255,0.35); }
+  input[type="date"].form-control { color-scheme: dark; }
+
+  /* ===== DASHBOARD ===== */
+  #dashboard { align-items: stretch; }
+  .dash-body {
+    flex: 1; padding: 18px 16px 100px;
+    display: flex; flex-direction: column; gap: 16px;
+  }
+  .search-bar {
+    display: flex; gap: 10px; align-items: center;
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.14);
+    border-radius: 12px; padding: 10px 14px;
+  }
+  .search-bar input {
+    flex: 1; background: none; border: none; outline: none;
+    color: #fff; font-size: 0.95rem;
+  }
+  .search-bar input::placeholder { color: rgba(255,255,255,0.4); }
+  .search-bar span { color: rgba(255,255,255,0.5); font-size: 1.1rem; }
+  .add-btn {
+    background: linear-gradient(135deg, #2e7d32, #43a047);
+    color: #fff; border: none; border-radius: 14px;
+    padding: 14px 20px; font-size: 1rem; font-weight: 700;
+    display: flex; align-items: center; gap: 10px;
+    cursor: pointer; box-shadow: 0 4px 18px rgba(46,125,50,0.45);
+    transition: all 0.2s; text-transform: uppercase; letter-spacing: 1px;
+    width: 100%;
+  }
+  .add-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 28px rgba(46,125,50,0.6); }
+
+  .section-title {
+    font-size: 0.78rem; font-weight: 700; color: rgba(255,255,255,0.5);
+    letter-spacing: 2px; text-transform: uppercase; margin-bottom: 4px;
+  }
+  .employee-list { display: flex; flex-direction: column; gap: 10px; }
+  .employee-card {
+    background: rgba(255,255,255,0.09);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: 14px; padding: 15px 16px;
+    display: flex; align-items: center; gap: 14px;
+    cursor: pointer; transition: all 0.2s;
+  }
+  .employee-card:hover {
+    background: rgba(46,125,50,0.2);
+    border-color: rgba(46,125,50,0.5);
+    transform: translateX(3px);
+  }
+  .emp-avatar {
+    width: 46px; height: 46px; border-radius: 50%;
+    background: linear-gradient(135deg, #2e7d32, #ffd600);
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; font-size: 1.1rem; color: #fff;
+    flex-shrink: 0;
+  }
+  .emp-info { flex: 1; min-width: 0; }
+  .emp-name { font-weight: 700; color: #fff; font-size: 1rem; }
+  .emp-meta { font-size: 0.75rem; color: rgba(255,255,255,0.55); margin-top: 2px; }
+  .emp-status {
+    font-size: 0.7rem; font-weight: 700; padding: 4px 10px;
+    border-radius: 20px; white-space: nowrap;
+  }
+  .status-work { background: rgba(46,125,50,0.3); color: #81c784; border: 1px solid rgba(46,125,50,0.4); }
+  .status-rest { background: rgba(198,40,40,0.25); color: #ef9a9a; border: 1px solid rgba(198,40,40,0.35); }
+  .status-entry { background: rgba(255,255,255,0.15); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+  .empty-state {
+    text-align: center; padding: 50px 20px;
+    color: rgba(255,255,255,0.4);
+  }
+  .empty-state .icon { font-size: 3rem; margin-bottom: 12px; }
+
+  /* ===== EMPLOYEE DETAIL ===== */
+  #detail { align-items: stretch; }
+  .detail-body {
+    flex: 1; padding: 16px 16px 80px;
+    display: flex; flex-direction: column; gap: 14px;
+    overflow-y: auto;
+  }
+  .detail-hero {
+    background: rgba(255,255,255,0.09);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: var(--radius); padding: 22px;
+    display: flex; align-items: center; gap: 16px;
+  }
+  .detail-avatar {
+    width: 64px; height: 64px; border-radius: 50%;
+    background: linear-gradient(135deg, #2e7d32, #ffd600);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.6rem; font-weight: 800; color: #fff;
+    box-shadow: 0 4px 18px rgba(46,125,50,0.4);
+    flex-shrink: 0;
+  }
+  .detail-info h2 { font-size: 1.2rem; color: #fff; font-weight: 800; }
+  .detail-info p { font-size: 0.8rem; color: rgba(255,255,255,0.55); margin-top: 4px; }
+  .contract-grid {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  }
+  .contract-item {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 12px; padding: 14px;
+    text-align: center;
+  }
+  .contract-item .ci-label { font-size: 0.68rem; color: rgba(255,255,255,0.5); letter-spacing: 1px; text-transform: uppercase; }
+  .contract-item .ci-value { font-size: 0.9rem; font-weight: 700; color: #fff; margin-top: 5px; }
+
+  .rotation-table-wrap { overflow-x: auto; border-radius: var(--radius); }
+  .rotation-table {
+    width: 100%; border-collapse: collapse;
+    background: rgba(255,255,255,0.05);
+    border-radius: var(--radius); overflow: hidden;
+    min-width: 320px;
+  }
+  .rotation-table thead tr { background: rgba(46,125,50,0.3); }
+  .rotation-table th {
+    padding: 11px 10px; font-size: 0.72rem; font-weight: 700;
+    color: rgba(255,255,255,0.8); text-align: left; letter-spacing: 0.5px;
+    white-space: nowrap;
+  }
+  .rotation-table td {
+    padding: 11px 10px; font-size: 0.82rem; font-weight: 700;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+    white-space: nowrap;
+  }
+  .row-entry { background: rgba(255,255,255,0.08); }
+  .row-entry td:first-child { color: #a5d6a7; }
+  .row-entry .val-col { color: #fff; font-weight: 800; }
+  .row-work { background: rgba(100,100,100,0.18); }
+  .row-work td:first-child { color: rgba(255,255,255,0.7); }
+  .row-work .val-col { color: #fff; font-weight: 800; }
+  .row-rest { background: rgba(255,255,255,0.06); }
+  .row-rest td:first-child { color: rgba(255,255,255,0.7); }
+  .row-rest .val-col { color: #ef9a9a; font-weight: 800; }
+
+  /* ===== LOADING ===== */
+  #loading {
+    align-items: center; justify-content: center;
+    background: transparent; min-height: 100vh;
+  }
+  .loading-inner {
+    text-align: center; display: flex; flex-direction: column;
+    align-items: center; gap: 22px;
+  }
+  .spinner-ring {
+    width: 80px; height: 80px; border-radius: 50%;
+    border: 4px solid rgba(46,125,50,0.25);
+    border-top-color: #4caf50;
+    border-right-color: var(--accent);
+    animation: spin 1s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-brand {
+    font-size: 1.8rem; font-weight: 900; color: #fff;
+    letter-spacing: 5px; text-shadow: 0 0 20px rgba(255,214,0,0.5);
+    animation: pulse 1.5s ease-in-out infinite;
+  }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+
+  /* ===== ADMIN PANEL ===== */
+  #admin { align-items: stretch; }
+  .admin-body {
+    flex: 1; padding: 18px 16px 80px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .admin-card {
+    background: rgba(255,255,255,0.08);
+    backdrop-filter: blur(14px);
+    border: 1px solid rgba(255,255,255,0.13);
+    border-radius: var(--radius); padding: 18px;
+  }
+  .admin-card h3 {
+    color: var(--accent); font-size: 0.9rem; font-weight: 700;
+    margin-bottom: 14px; display: flex; align-items: center; gap: 8px;
+    text-transform: uppercase; letter-spacing: 1px;
+  }
+  .stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .stat-item {
+    background: rgba(255,255,255,0.07);
+    border-radius: 10px; padding: 14px; text-align: center;
+  }
+  .stat-val { font-size: 1.8rem; font-weight: 900; color: #fff; }
+  .stat-label { font-size: 0.7rem; color: rgba(255,255,255,0.5); margin-top: 3px; }
+  .msg-list { display: flex; flex-direction: column; gap: 10px; max-height: 260px; overflow-y: auto; }
+  .msg-item {
+    background: rgba(255,255,255,0.07);
+    border-radius: 10px; padding: 12px 14px;
+    display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+  }
+  .msg-text { font-size: 0.83rem; color: #fff; flex: 1; }
+  .msg-from { font-size: 0.7rem; color: rgba(255,255,255,0.45); margin-top: 3px; }
+  .msg-actions { display: flex; gap: 6px; }
+
+  /* ===== USER PROFILE ===== */
+  #profile { align-items: stretch; }
+  .profile-body {
+    flex: 1; padding: 18px 16px 80px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+
+  /* ===== MESSAGING ===== */
+  .msg-box {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+    background: rgba(13,17,23,0.97);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(255,255,255,0.1);
+    padding: 14px 16px;
+    transform: translateY(100%);
+    transition: transform 0.3s ease;
+  }
+  .msg-box.open { transform: translateY(0); }
+  .msg-box-header {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 12px;
+  }
+  .msg-box-header h4 { color: #fff; font-size: 0.95rem; }
+  .msg-input-row { display: flex; gap: 10px; }
+  .msg-input-row textarea {
+    flex: 1; background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 10px; color: #fff; font-size: 0.9rem;
+    padding: 10px 14px; resize: none; height: 70px; outline: none;
+  }
+
+  /* ===== MODAL ===== */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 300;
+    background: rgba(0,0,0,0.7); backdrop-filter: blur(6px);
+    display: none; align-items: flex-end; justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: #131b22;
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 22px 22px 0 0;
+    padding: 28px 22px 40px;
+    width: 100%; max-width: 480px;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+  .modal h3 { color: #fff; font-size: 1.1rem; margin-bottom: 18px; display: flex; align-items: center; gap: 10px; }
+  .modal-actions { display: flex; gap: 10px; margin-top: 18px; }
+  .modal-actions .btn { flex: 1; }
+
+  /* ===== NOTIFICATION ===== */
+  .notif-bar {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 400;
+    background: linear-gradient(135deg, #e65100, #ff6d00);
+    color: #fff; padding: 14px 18px;
+    display: flex; align-items: center; gap: 12px;
+    font-size: 0.88rem; font-weight: 600;
+    transform: translateY(-100%);
+    transition: transform 0.4s ease;
+    box-shadow: 0 4px 20px rgba(230,81,0,0.5);
+  }
+  .notif-bar.show { transform: translateY(0); }
+  .notif-icon { font-size: 1.3rem; }
+  .notif-close { margin-left: auto; cursor: pointer; font-size: 1.2rem; opacity: 0.8; }
+
+  /* ===== FOOTER ===== */
+  .app-footer {
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 90;
+    background: rgba(0,0,0,0.75); backdrop-filter: blur(16px);
+    border-top: 1px solid rgba(255,255,255,0.08);
+    text-align: center; padding: 10px;
+    font-size: 0.68rem; color: rgba(255,255,255,0.35);
+    letter-spacing: 0.5px;
+  }
+
+  /* ===== DARK MODE TOGGLE ===== */
+  .dark-mode-label { color: rgba(255,255,255,0.35) !important; }
+  body.light-mode {
+    --bg-card-solid: #1a1a1a;
+  }
+
+  /* ===== RESET BTN ===== */
+  .reset-fab {
+    position: fixed; bottom: 60px; right: 14px; z-index: 150;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--danger);
+    border: none; color: #fff; font-size: 0.85rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; box-shadow: 0 2px 10px rgba(198,40,40,0.5);
+    transition: transform 0.2s;
+  }
+  .reset-fab:hover { transform: scale(1.1) rotate(90deg); }
+
+  /* ===== TOAST ===== */
+  .toast {
+    position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%) translateY(20px);
+    background: rgba(30,40,30,0.97); border: 1px solid rgba(46,125,50,0.4);
+    color: #fff; padding: 12px 22px; border-radius: 30px;
+    font-size: 0.85rem; font-weight: 600;
+    opacity: 0; transition: all 0.3s; z-index: 500;
+    white-space: nowrap; pointer-events: none;
+    backdrop-filter: blur(10px);
+  }
+  .toast.show {
+    opacity: 1; transform: translateX(-50%) translateY(0);
+  }
+
+  /* ===== BACK BTN ===== */
+  .back-btn {
+    background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15);
+    color: #fff; border-radius: 50%;
+    width: 38px; height: 38px;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer; font-size: 1rem;
+    transition: background 0.2s;
+    flex-shrink: 0;
+  }
+  .back-btn:hover { background: rgba(46,125,50,0.3); }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.2); border-radius: 2px; }
+
+  /* ===== UTILITY ===== */
+  .text-accent { color: var(--accent); }
+  .text-success { color: #81c784; }
+  .text-danger { color: #ef9a9a; }
+  .mt-8 { margin-top: 8px; }
+  .mt-16 { margin-top: 16px; }
+  .fw-bold { font-weight: 700; }
+  .text-white { color: #fff; }
+  .text-muted { color: rgba(255,255,255,0.5); }
+  .d-none { display: none; }
+
+  /* Admin badge */
+  .badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 18px; height: 18px; border-radius: 9px;
+    background: var(--danger); color: #fff;
+    font-size: 0.65rem; font-weight: 800; padding: 0 5px;
+    position: absolute; top: -4px; right: -4px;
+  }
+  .icon-btn { position: relative; }
+</style>
+</head>
+<body>
+
+<!-- Global Background -->
+<div class="global-bg"></div>
+
+<!-- Notification Bar -->
+<div class="notif-bar" id="notifBar">
+  <span class="notif-icon">🔔</span>
+  <span id="notifText">Votre récupération prend fin demain !</span>
+  <span class="notif-close" onclick="closeNotif()">✕</span>
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Reset FAB -->
+<button class="reset-fab" onclick="openModal('resetModal')" title="Réinitialiser">🗑️</button>
+
+<!-- Footer -->
+<div class="app-footer">© De SAKA Corp 2026 – Tous droits réservés</div>
+
+<!-- ===== SPLASH ===== -->
+<div class="page active" id="splash">
+  <button class="splash-home-btn" onclick="goTo('welcome')" title="Accueil">🏠</button>
+  <div class="splash-inner">
+    <div class="splash-logo-ring">IRS</div>
+    <div class="splash-brand">DE SAKA</div>
+    <div class="splash-sub">IMPERATOR RESSOURCES SA – GABON</div>
+    <div style="font-size:0.75rem;color:rgba(255,255,255,0.35);letter-spacing:2px;margin-top:8px;">GESTION DES ROTATIONS</div>
+  </div>
+</div>
+
+<!-- ===== WELCOME ===== -->
+<div class="page" id="welcome">
+  <div class="app-header welcome-header">
+    <div class="header-logo">
+      <div class="header-logo-icon">IRS</div>
+      <div class="header-title">IMPERATOR<span>Ressources SA – Gabon</span></div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="openModal('adminContactModal')" title="Administrateur">👤</button>
+    </div>
+  </div>
+  <div class="welcome-body">
+    <div class="welcome-logo-ring">IRS</div>
+    <div class="welcome-title">
+      BIENVENUE DANS LA GESTION MOBILE DE PLANNING PRÉVISIONNEL DU PERSONNEL
+      <em>IMPERATOR RESSOURCES SA – GABON<br>DÉVELOPPÉE PAR DE SAKA</em>
+    </div>
+    <div class="auth-btns">
+      <button class="btn btn-primary" onclick="goTo('login')">🔑 Se Connecter</button>
+      <button class="btn btn-outline" onclick="goTo('register')">📝 S'inscrire</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LOGIN ===== -->
+<div class="page" id="login">
+  <div class="app-header">
+    <button class="back-btn" onclick="goTo('welcome')">←</button>
+    <div class="header-title" style="color:#fff;font-size:1rem;font-weight:800;flex:1;text-align:center;">Connexion</div>
+    <div style="width:38px;"></div>
+  </div>
+  <div class="auth-container">
+    <div class="auth-card">
+      <h2>🔑 Connexion</h2>
+      <div class="form-group">
+        <label>Nom d'utilisateur</label>
+        <input class="form-control" id="loginUser" type="text" placeholder="Votre nom">
+      </div>
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input class="form-control" id="loginPass" type="password" placeholder="••••••••">
+      </div>
+      <button class="btn btn-primary mt-16" onclick="doLogin()">🚀 Se Connecter</button>
+      <div style="text-align:center;margin-top:14px;">
+        <span style="font-size:0.82rem;color:rgba(255,255,255,0.5);">Pas de compte ? </span>
+        <span style="font-size:0.82rem;color:var(--accent);cursor:pointer;font-weight:700;" onclick="goTo('register')">S'inscrire</span>
+      </div>
+      <div style="text-align:center;margin-top:10px;">
+        <span style="font-size:0.78rem;color:rgba(255,255,255,0.4);cursor:pointer;" onclick="openModal('adminContactModal')">Mot de passe oublié ? Contacter l'admin 👤</span>
+      </div>
+    </div>
+    <!-- Admin Login -->
+    <div class="auth-card">
+      <h2>🛡️ Accès Administrateur</h2>
+      <div class="form-group">
+        <label>Code Administrateur</label>
+        <input class="form-control" id="adminPass" type="password" placeholder="Code secret admin">
+      </div>
+      <button class="btn btn-accent mt-8" onclick="doAdminLogin()">🛡️ Accès Admin</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== REGISTER ===== -->
+<div class="page" id="register">
+  <div class="app-header">
+    <button class="back-btn" onclick="goTo('welcome')">←</button>
+    <div class="header-title" style="color:#fff;font-size:1rem;font-weight:800;flex:1;text-align:center;">Inscription</div>
+    <div style="width:38px;"></div>
+  </div>
+  <div class="auth-container">
+    <div class="auth-card">
+      <h2>📝 Créer un compte</h2>
+      <div class="form-group">
+        <label>Nom complet</label>
+        <input class="form-control" id="regName" type="text" placeholder="Prénom Nom">
+      </div>
+      <div class="form-group">
+        <label>Nom d'utilisateur</label>
+        <input class="form-control" id="regUser" type="text" placeholder="Identifiant unique">
+      </div>
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input class="form-control" id="regPass" type="password" placeholder="Min. 6 caractères">
+      </div>
+      <div class="form-group">
+        <label>Confirmer le mot de passe</label>
+        <input class="form-control" id="regPass2" type="password" placeholder="••••••••">
+      </div>
+      <div class="form-group">
+        <label>Date de prise de poste</label>
+        <input class="form-control" id="regStart" type="date">
+      </div>
+      <div class="form-group">
+        <label>Date début du contrat</label>
+        <input class="form-control" id="regContractStart" type="date">
+      </div>
+      <div class="form-group">
+        <label>Date fin du contrat</label>
+        <input class="form-control" id="regContractEnd" type="date">
+      </div>
+      <button class="btn btn-primary mt-8" onclick="doRegister()">✅ Créer mon compte</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== LOADING ===== -->
+<div class="page" id="loading">
+  <div class="loading-inner">
+    <div class="spinner-ring"></div>
+    <div class="loading-brand">DE SAKA</div>
+    <div style="font-size:0.78rem;color:rgba(255,255,255,0.45);letter-spacing:2px;">CALCUL EN COURS…</div>
+  </div>
+</div>
+
+<!-- ===== DASHBOARD (Admin) ===== -->
+<div class="page" id="dashboard">
+  <div class="app-header">
+    <div class="header-logo">
+      <div class="header-logo-icon">IRS</div>
+      <div class="header-title">TABLEAU DE BORD<span>Administration</span></div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="goTo('admin')" title="Admin">
+        🛡️
+        <span class="badge" id="msgBadge" style="display:none;">0</span>
+      </button>
+      <button class="icon-btn" onclick="confirmLogout()" title="Déconnexion">🚪</button>
+    </div>
+  </div>
+  <div class="dash-body">
+    <button class="add-btn" onclick="goTo('addEmployee')">➕ Ajouter un Employé</button>
+    <div class="search-bar">
+      <span>🔍</span>
+      <input type="text" placeholder="Rechercher un employé…" id="searchInput" oninput="filterEmployees()">
+    </div>
+    <div class="section-title">Employés enregistrés</div>
+    <div class="employee-list" id="employeeList">
+      <div class="empty-state">
+        <div class="icon">👷</div>
+        <div>Aucun employé enregistré</div>
+        <div style="font-size:0.75rem;margin-top:6px;">Appuyez sur + pour commencer</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== ADD EMPLOYEE ===== -->
+<div class="page" id="addEmployee">
+  <div class="app-header">
+    <button class="back-btn" onclick="goTo('dashboard')">←</button>
+    <div class="header-title" style="color:#fff;font-size:1rem;font-weight:800;flex:1;text-align:center;">Nouvel Employé</div>
+    <div style="width:38px;"></div>
+  </div>
+  <div class="auth-container">
+    <div class="auth-card">
+      <h2>👷 Informations</h2>
+      <div class="form-group">
+        <label>Nom complet</label>
+        <input class="form-control" id="empName" type="text" placeholder="Prénom Nom">
+      </div>
+      <div class="form-group">
+        <label>Date de prise de poste</label>
+        <input class="form-control" id="empStart" type="date">
+      </div>
+      <div class="form-group">
+        <label>Date début du contrat</label>
+        <input class="form-control" id="empContractStart" type="date">
+      </div>
+      <div class="form-group">
+        <label>Date fin du contrat</label>
+        <input class="form-control" id="empContractEnd" type="date">
+      </div>
+      <div class="form-group">
+        <label>Durée du contrat (calculée automatiquement)</label>
+        <input class="form-control" id="empDuration" type="text" readonly placeholder="Sera calculée…" style="opacity:0.6;">
+      </div>
+      <button class="btn btn-primary mt-8" onclick="saveEmployee()">💾 ENREGISTRER</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== EMPLOYEE DETAIL ===== -->
+<div class="page" id="detail">
+  <div class="app-header">
+    <button class="back-btn" onclick="goBack()">←</button>
+    <div class="header-title" style="color:#fff;font-size:1rem;font-weight:800;flex:1;text-align:center;" id="detailTitle">Détails</div>
+    <button class="icon-btn danger" onclick="openDeleteModal()" title="Supprimer">🗑️</button>
+  </div>
+  <div class="detail-body" id="detailBody">
+    <!-- filled dynamically -->
+  </div>
+</div>
+
+<!-- ===== USER PROFILE ===== -->
+<div class="page" id="profile">
+  <div class="app-header">
+    <div class="header-logo">
+      <div class="header-logo-icon">IRS</div>
+      <div class="header-title">Mon Profil<span>Consultation</span></div>
+    </div>
+    <div class="header-actions">
+      <button class="icon-btn" onclick="openModal('adminContactModal')" title="Contacter admin">👤</button>
+      <button class="icon-btn" onclick="confirmLogout()" title="Déconnexion">🚪</button>
+    </div>
+  </div>
+  <div class="profile-body" id="profileBody">
+    <!-- filled dynamically -->
+  </div>
+</div>
+
+<!-- ===== ADMIN PANEL ===== -->
+<div class="page" id="admin">
+  <div class="app-header">
+    <button class="back-btn" onclick="goTo('dashboard')">←</button>
+    <div class="header-title" style="color:#fff;font-size:1rem;font-weight:800;flex:1;text-align:center;">Administration</div>
+    <div style="width:38px;"></div>
+  </div>
+  <div class="admin-body">
+    <div class="admin-card">
+      <h3>📊 Statistiques</h3>
+      <div class="stat-grid">
+        <div class="stat-item"><div class="stat-val" id="statTotal">0</div><div class="stat-label">Employés</div></div>
+        <div class="stat-item"><div class="stat-val" id="statWork">0</div><div class="stat-label">En poste</div></div>
+        <div class="stat-item"><div class="stat-val" id="statRest">0</div><div class="stat-label">En récup.</div></div>
+        <div class="stat-item"><div class="stat-val" id="statUsers">0</div><div class="stat-label">Comptes</div></div>
+      </div>
+    </div>
+    <div class="admin-card">
+      <h3>✉️ Messages du Personnel</h3>
+      <div class="msg-list" id="adminMsgList">
+        <div style="color:rgba(255,255,255,0.4);font-size:0.82rem;text-align:center;padding:20px;">Aucun message</div>
+      </div>
+    </div>
+    <div class="admin-card">
+      <h3>👥 Comptes Utilisateurs</h3>
+      <div id="userAccountsList" style="display:flex;flex-direction:column;gap:8px;"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Messaging Box -->
+<div class="msg-box" id="msgBox">
+  <div class="msg-box-header">
+    <h4>✉️ Message à l'administrateur</h4>
+    <span style="cursor:pointer;color:rgba(255,255,255,0.6);font-size:1.2rem;" onclick="closeMsgBox()">✕</span>
+  </div>
+  <div class="form-group">
+    <input class="form-control" id="msgSenderName" type="text" placeholder="Votre nom complet">
+  </div>
+  <div class="msg-input-row">
+    <textarea id="msgContent" placeholder="Décrivez votre problème…"></textarea>
+    <button class="btn btn-primary btn-sm" onclick="sendMsg()" style="align-self:flex-end;height:70px;min-width:70px;">📤</button>
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- Admin Contact Modal -->
+<div class="modal-overlay" id="adminContactModal">
+  <div class="modal">
+    <h3>👤 Contacter l'Administrateur</h3>
+    <p style="color:rgba(255,255,255,0.6);font-size:0.85rem;margin-bottom:16px;">Envoyez votre nom à l'administrateur pour demander la suppression de votre compte.</p>
+    <div class="form-group">
+      <label>Votre nom complet</label>
+      <input class="form-control" id="contactName" type="text" placeholder="Prénom Nom">
+    </div>
+    <div class="form-group">
+      <label>Message (optionnel)</label>
+      <input class="form-control" id="contactMsg" type="text" placeholder="Ex: compte bloqué, perte de mot de passe…">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('adminContactModal')">Annuler</button>
+      <button class="btn btn-primary btn-sm" onclick="sendAdminContact()">📤 Envoyer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reset Modal -->
+<div class="modal-overlay" id="resetModal">
+  <div class="modal">
+    <h3>🗑️ Réinitialisation</h3>
+    <p style="color:rgba(255,255,255,0.6);font-size:0.85rem;margin-bottom:16px;">⚠️ Cette action supprimera <strong style="color:#ef9a9a;">toutes les données</strong>. Entrez le mot de passe administrateur.</p>
+    <div class="form-group">
+      <label>Mot de passe administrateur</label>
+      <input class="form-control" id="resetPass" type="password" placeholder="••••••••">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('resetModal')">Annuler</button>
+      <button class="btn btn-danger btn-sm" onclick="doReset()">🗑️ Réinitialiser</button>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Employee Modal -->
+<div class="modal-overlay" id="deleteModal">
+  <div class="modal">
+    <h3>🗑️ Supprimer l'employé</h3>
+    <p style="color:rgba(255,255,255,0.6);font-size:0.85rem;margin-bottom:16px;">Confirmez la suppression de cet employé. Cette action est irréversible.</p>
+    <div class="form-group">
+      <label>Mot de passe administrateur</label>
+      <input class="form-control" id="deletePass" type="password" placeholder="••••••••">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('deleteModal')">Annuler</button>
+      <button class="btn btn-danger btn-sm" onclick="doDeleteEmployee()">🗑️ Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- Logout Confirm -->
+<div class="modal-overlay" id="logoutModal">
+  <div class="modal">
+    <h3>🚪 Déconnexion</h3>
+    <p style="color:rgba(255,255,255,0.6);font-size:0.85rem;margin-bottom:16px;">Voulez-vous vous déconnecter ?</p>
+    <div class="modal-actions">
+      <button class="btn btn-outline btn-sm" onclick="closeModal('logoutModal')">Annuler</button>
+      <button class="btn btn-danger btn-sm" onclick="doLogout()">🚪 Déconnecter</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ===== CONFIG =====
+const ADMIN_PASS = 'Val-authentic5';
+const ADMIN_USER = 'admin';
+const WORK_DAYS = 42;
+const REST_DAYS = 12;
+
+// ===== STATE =====
+let currentPage = 'splash';
+let currentEmpId = null;
+let previousPage = 'dashboard';
+let currentUser = null; // { username, isAdmin }
+let detailDeleteTarget = null;
+
+// ===== STORAGE HELPERS =====
+const store = {
+  get: (k, def = null) => {
+    try { const v = localStorage.getItem(k); return v !== null ? JSON.parse(v) : def; } catch { return def; }
+  },
+  set: (k, v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} },
+  remove: (k) => { try { localStorage.removeItem(k); } catch {} }
+};
+
+const getEmployees = () => store.get('imp_employees', []);
+const saveEmployees = (e) => store.set('imp_employees', e);
+const getUsers = () => store.get('imp_users', []);
+const saveUsers = (u) => store.set('imp_users', u);
+const getMessages = () => store.get('imp_messages', []);
+const saveMessages = (m) => store.set('imp_messages', m);
+
+// ===== DATE HELPERS =====
+const parseDate = (s) => { if (!s) return null; const d = new Date(s + 'T00:00:00'); return isNaN(d) ? null : d; };
+const fmtDate = (d) => {
+  if (!d) return '—';
+  const dd = String(d.getDate()).padStart(2,'0');
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  return `${dd}/${mm}/${d.getFullYear()}`;
+};
+const addDays = (d, n) => { const r = new Date(d); r.setDate(r.getDate() + n); return r; };
+const daysBetween = (a, b) => Math.round((b - a) / 86400000);
+const today = () => { const d = new Date(); d.setHours(0,0,0,0); return d; };
+
+// ===== ROTATION CALC =====
+function calcRotations(startDate, contractEnd) {
+  const rotations = [];
+  let cursor = new Date(startDate);
+  const end = new Date(contractEnd);
+  end.setHours(0,0,0,0);
+  cursor.setHours(0,0,0,0);
+  let idx = 1;
+
+  while (cursor <= end) {
+    const workStart = new Date(cursor);
+    const workEndPotential = addDays(cursor, WORK_DAYS - 1);
+    const workEnd = workEndPotential <= end ? workEndPotential : end;
+
+    const restStart = addDays(workEnd, 1); // 43rd day
+    const restEnd = addDays(restStart, REST_DAYS - 1);
+    const reprise = addDays(restEnd, 1); // 13th day after last rest day = 1st work day
+
+    rotations.push({
+      index: idx++,
+      workStart: new Date(workStart),
+      workEnd: new Date(workEnd),
+      restStart: restStart <= end ? new Date(restStart) : null,
+      restEnd: restEnd <= end ? new Date(restEnd) : null,
+      reprise: reprise <= end ? new Date(reprise) : null,
+      isPartial: workEndPotential > end
+    });
+
+    if (reprise > end) break;
+    cursor = new Date(reprise);
+    if (cursor > end) break;
+  }
+  return rotations;
+}
+
+// ===== CURRENT STATUS =====
+function getCurrentStatus(emp) {
+  const t = today();
+  const rotations = calcRotations(parseDate(emp.startDate), parseDate(emp.contractEnd));
+  for (const r of rotations) {
+    if (t >= r.workStart && t <= r.workEnd) return { type: 'work', label: 'En poste', rotation: r };
+    if (r.restStart && r.restEnd && t >= r.restStart && t <= r.restEnd) return { type: 'rest', label: 'En récupération', rotation: r };
+  }
+  const start = parseDate(emp.startDate);
+  if (start && t < start) return { type: 'entry', label: 'Pas encore en poste', rotation: null };
+  return { type: 'ended', label: 'Contrat terminé', rotation: null };
+}
+
+// ===== NAVIGATION =====
+function goTo(pageId) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  const el = document.getElementById(pageId);
+  if (el) el.classList.add('active');
+  currentPage = pageId;
+  if (pageId === 'dashboard') renderEmployeeList();
+  if (pageId === 'admin') renderAdminPanel();
+  if (pageId === 'addEmployee') {
+    document.getElementById('empDuration').value = '';
+    document.getElementById('empContractStart').oninput =
+    document.getElementById('empContractEnd').oninput = calcDuration;
+  }
+}
+
+function goBack() {
+  goTo(previousPage);
+}
+
+// ===== SPLASH LOGIC =====
+(function initSplash() {
+  setTimeout(() => { goTo('welcome'); }, 3400);
+})();
+
+// ===== DURATION CALC =====
+function calcDuration() {
+  const s = document.getElementById('empContractStart').value;
+  const e = document.getElementById('empContractEnd').value;
+  if (s && e) {
+    const days = daysBetween(parseDate(s), parseDate(e));
+    if (days > 0) {
+      const months = Math.floor(days / 30);
+      const rem = days % 30;
+      document.getElementById('empDuration').value =
+        `${days} jours${months > 0 ? ` (≈ ${months} mois${rem > 0 ? ` ${rem} j` : ''})` : ''}`;
+    } else {
+      document.getElementById('empDuration').value = 'Dates invalides';
+    }
+  }
+}
+
+// ===== AUTH =====
+function doLogin() {
+  const u = document.getElementById('loginUser').value.trim();
+  const p = document.getElementById('loginPass').value;
+  if (!u || !p) { showToast('⚠️ Remplissez tous les champs'); return; }
+  const users = getUsers();
+  const found = users.find(x => x.username === u && x.password === p);
+  if (!found) { showToast('❌ Identifiants incorrects'); return; }
+  currentUser = { username: u, isAdmin: false, data: found };
+  showLoading(() => {
+    renderProfile();
+    goTo('profile');
+    checkNotifications();
+  });
+}
+
+function doAdminLogin() {
+  const p = document.getElementById('adminPass').value;
+  if (p !== ADMIN_PASS) { showToast('❌ Code administrateur incorrect'); return; }
+  currentUser = { username: ADMIN_USER, isAdmin: true };
+  showLoading(() => {
+    goTo('dashboard');
+    checkNotifications();
+  });
+}
+
+function doRegister() {
+  const name = document.getElementById('regName').value.trim();
+  const user = document.getElementById('regUser').value.trim();
+  const pass = document.getElementById('regPass').value;
+  const pass2 = document.getElementById('regPass2').value;
+  const start = document.getElementById('regStart').value;
+  const cs = document.getElementById('regContractStart').value;
+  const ce = document.getElementById('regContractEnd').value;
+
+  if (!name || !user || !pass || !start || !cs || !ce) { showToast('⚠️ Tous les champs sont requis'); return; }
+  if (pass !== pass2) { showToast('❌ Les mots de passe ne correspondent pas'); return; }
+  if (pass.length < 6) { showToast('❌ Mot de passe trop court (min. 6 caractères)'); return; }
+
+  const users = getUsers();
+  if (users.find(x => x.username === user)) { showToast('❌ Nom d\'utilisateur déjà utilisé'); return; }
+
+  const newUser = { name, username: user, password: pass, startDate: start, contractStart: cs, contractEnd: ce, createdAt: new Date().toISOString() };
+  users.push(newUser);
+  saveUsers(users);
+  showToast('✅ Compte créé avec succès !');
+  setTimeout(() => goTo('login'), 1200);
+}
+
+function confirmLogout() { openModal('logoutModal'); }
+function doLogout() {
+  currentUser = null;
+  closeModal('logoutModal');
+  goTo('welcome');
+}
+
+// ===== EMPLOYEE CRUD =====
+function saveEmployee() {
+  const name = document.getElementById('empName').value.trim();
+  const start = document.getElementById('empStart').value;
+  const cs = document.getElementById('empContractStart').value;
+  const ce = document.getElementById('empContractEnd').value;
+
+  if (!name || !start || !cs || !ce) { showToast('⚠️ Tous les champs sont requis'); return; }
+  if (parseDate(cs) >= parseDate(ce)) { showToast('❌ Dates de contrat invalides'); return; }
+  if (parseDate(start) < parseDate(cs)) { showToast('❌ La prise de poste ne peut pas être avant le début du contrat'); return; }
+
+  showLoading(() => {
+    const employees = getEmployees();
+    const emp = {
+      id: Date.now().toString(),
+      name, startDate: start, contractStart: cs, contractEnd: ce,
+      createdAt: new Date().toISOString()
+    };
+    employees.push(emp);
+    saveEmployees(employees);
+    showToast('✅ Employé enregistré !');
+    goTo('dashboard');
+  });
+}
+
+function openDeleteModal() {
+  detailDeleteTarget = currentEmpId;
+  document.getElementById('deletePass').value = '';
+  openModal('deleteModal');
+}
+
+function doDeleteEmployee() {
+  const p = document.getElementById('deletePass').value;
+  if (p !== ADMIN_PASS) { showToast('❌ Mot de passe incorrect'); return; }
+  let employees = getEmployees();
+  employees = employees.filter(e => e.id !== detailDeleteTarget);
+  saveEmployees(employees);
+  closeModal('deleteModal');
+  showToast('🗑️ Employé supprimé');
+  goTo('dashboard');
+}
+
+// ===== RENDER EMPLOYEE LIST =====
+function renderEmployeeList() {
+  const list = document.getElementById('employeeList');
+  const query = (document.getElementById('searchInput')?.value || '').toLowerCase();
+  let employees = getEmployees();
+  if (query) employees = employees.filter(e => e.name.toLowerCase().includes(query));
+
+  if (!employees.length) {
+    list.innerHTML = `<div class="empty-state"><div class="icon">👷</div><div>${query ? 'Aucun résultat' : 'Aucun employé enregistré'}</div><div style="font-size:0.75rem;margin-top:6px;">${query ? '' : 'Appuyez sur + pour commencer'}</div></div>`;
+    return;
+  }
+
+  list.innerHTML = employees.map(emp => {
+    const status = getCurrentStatus(emp);
+    const initials = emp.name.split(' ').map(w => w[0]).join('').substring(0,2).toUpperCase();
+    const cls = status.type === 'work' ? 'status-work' : status.type === 'rest' ? 'status-rest' : 'status-entry';
+    return `<div class="employee-card" onclick="openDetail('${emp.id}')">
+      <div class="emp-avatar">${initials}</div>
+      <div class="emp-info">
+        <div class="emp-name">${emp.name}</div>
+        <div class="emp-meta">Poste : ${fmtDate(parseDate(emp.startDate))}</div>
+        <div class="emp-meta">Fin contrat : ${fmtDate(parseDate(emp.contractEnd))}</div>
+      </div>
+      <div class="emp-status ${cls}">${status.label}</div>
+    </div>`;
+  }).join('');
+
+  // Stats for admin panel
+  updateStats(getEmployees());
+}
+
+function filterEmployees() { renderEmployeeList(); }
+
+function updateStats(employees) {
+  const t = today();
+  let work = 0, rest = 0;
+  employees.forEach(e => {
+    const s = getCurrentStatus(e);
+    if (s.type === 'work') work++;
+    if (s.type === 'rest') rest++;
+  });
+  const el = (id, v) => { const el = document.getElementById(id); if(el) el.textContent = v; };
+  el('statTotal', employees.length);
+  el('statWork', work);
+  el('statRest', rest);
+  el('statUsers', getUsers().length);
+}
+
+// ===== EMPLOYEE DETAIL =====
+function openDetail(id) {
+  const emp = getEmployees().find(e => e.id === id);
+  if (!emp) return;
+  currentEmpId = id;
+  previousPage = currentPage;
+  document.getElementById('detailTitle').textContent = emp.name;
+
+  const rotations = calcRotations(parseDate(emp.startDate), parseDate(emp.contractEnd));
+  const cs = fmtDate(parseDate(emp.contractStart));
+  const ce = fmtDate(parseDate(emp.contractEnd));
+  const days = daysBetween(parseDate(emp.contractStart), parseDate(emp.contractEnd));
+
+  let html = `
+  <div class="detail-hero">
+    <div class="detail-avatar">${emp.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}</div>
+    <div class="detail-info">
+      <h2>${emp.name}</h2>
+      <p>🗓️ Prise de poste : ${fmtDate(parseDate(emp.startDate))}</p>
+    </div>
+  </div>
+  <div class="contract-grid">
+    <div class="contract-item"><div class="ci-label">Début contrat</div><div class="ci-value">${cs}</div></div>
+    <div class="contract-item"><div class="ci-label">Fin contrat</div><div class="ci-value">${ce}</div></div>
+    <div class="contract-item"><div class="ci-label">Durée</div><div class="ci-value">${days} j</div></div>
+    <div class="contract-item"><div class="ci-label">Rotations</div><div class="ci-value">${rotations.length}</div></div>
+  </div>
+  <div class="section-title" style="margin-top:4px;">Planning des rotations</div>
+  <div class="rotation-table-wrap">
+    <table class="rotation-table">
+      <thead><tr>
+        <th>#</th><th>Type</th><th>Début</th><th>Fin</th>
+      </tr></thead>
+      <tbody>`;
+
+  rotations.forEach(r => {
+    html += `<tr class="row-entry">
+      <td rowspan="3" style="font-weight:800;color:var(--accent);border-right:1px solid rgba(255,255,255,0.08);">${r.index}</td>
+      <td>🟢 Travail</td>
+      <td class="val-col">${fmtDate(r.workStart)}</td>
+      <td class="val-col">${fmtDate(r.workEnd)}</td>
+    </tr>`;
+    html += `<tr class="row-work">
+      <td>🔵 Sortie récup.</td>
+      <td class="val-col">${r.restStart ? fmtDate(r.restStart) : '—'}</td>
+      <td class="val-col">${r.restEnd ? fmtDate(r.restEnd) : '—'}</td>
+    </tr>`;
+    html += `<tr class="row-rest">
+      <td>🔴 Reprise</td>
+      <td class="val-col" colspan="2">${r.reprise ? fmtDate(r.reprise) : (r.isPartial ? '<em style="font-size:0.75rem;color:rgba(255,255,255,0.4);">Fin de contrat</em>' : '—')}</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table></div>`;
+  document.getElementById('detailBody').innerHTML = html;
+  goTo('detail');
+}
+
+// ===== USER PROFILE =====
+function renderProfile() {
+  if (!currentUser || currentUser.isAdmin) return;
+  const u = currentUser.data;
+  const rotations = calcRotations(parseDate(u.startDate), parseDate(u.contractEnd));
+  const status = getCurrentStatus({ startDate: u.startDate, contractEnd: u.contractEnd });
+  const days = u.contractStart && u.contractEnd ? daysBetween(parseDate(u.contractStart), parseDate(u.contractEnd)) : 0;
+
+  const cls = status.type === 'work' ? 'status-work' : status.type === 'rest' ? 'status-rest' : 'status-entry';
+
+  let html = `
+  <div class="detail-hero">
+    <div class="detail-avatar">${u.name.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase()}</div>
+    <div class="detail-info">
+      <h2>${u.name}</h2>
+      <p>@${u.username}</p>
+      <p style="margin-top:6px;"><span class="emp-status ${cls}" style="padding:5px 12px;border-radius:20px;font-size:0.75rem;">${status.label}</span></p>
+    </div>
+  </div>
+  <div style="background:rgba(255,200,0,0.08);border:1px solid rgba(255,200,0,0.2);border-radius:12px;padding:14px;font-size:0.82rem;color:rgba(255,255,255,0.6);">
+    ℹ️ Mode consultation uniquement. Aucune modification n'est autorisée. Pour toute demande, contactez l'administrateur.
+  </div>
+  <div class="contract-grid">
+    <div class="contract-item"><div class="ci-label">Prise de poste</div><div class="ci-value">${fmtDate(parseDate(u.startDate))}</div></div>
+    <div class="contract-item"><div class="ci-label">Fin contrat</div><div class="ci-value">${fmtDate(parseDate(u.contractEnd))}</div></div>
+    <div class="contract-item"><div class="ci-label">Durée contrat</div><div class="ci-value">${days} j</div></div>
+    <div class="contract-item"><div class="ci-label">Rotations</div><div class="ci-value">${rotations.length}</div></div>
+  </div>
+  <div class="section-title" style="margin-top:4px;">Mon planning de rotations</div>
+  <div class="rotation-table-wrap">
+    <table class="rotation-table">
+      <thead><tr><th>#</th><th>Type</th><th>Début</th><th>Fin</th></tr></thead>
+      <tbody>`;
+
+  rotations.forEach(r => {
+    html += `<tr class="row-entry">
+      <td rowspan="3" style="font-weight:800;color:var(--accent);border-right:1px solid rgba(255,255,255,0.08);">${r.index}</td>
+      <td>🟢 Travail</td><td class="val-col">${fmtDate(r.workStart)}</td><td class="val-col">${fmtDate(r.workEnd)}</td>
+    </tr>
+    <tr class="row-work">
+      <td>🔵 Récupération</td><td class="val-col">${r.restStart ? fmtDate(r.restStart) : '—'}</td><td class="val-col">${r.restEnd ? fmtDate(r.restEnd) : '—'}</td>
+    </tr>
+    <tr class="row-rest">
+      <td>🔴 Reprise</td><td class="val-col" colspan="2">${r.reprise ? fmtDate(r.reprise) : '—'}</td>
+    </tr>`;
+  });
+  html += `</tbody></table></div>`;
+  document.getElementById('profileBody').innerHTML = html;
+}
+
+// ===== ADMIN PANEL =====
+function renderAdminPanel() {
+  updateStats(getEmployees());
+  renderAdminMessages();
+  renderUserAccounts();
+}
+
+function renderAdminMessages() {
+  const msgs = getMessages();
+  const list = document.getElementById('adminMsgList');
+  const badge = document.getElementById('msgBadge');
+  const unread = msgs.filter(m => !m.read).length;
+  if (badge) {
+    badge.textContent = unread;
+    badge.style.display = unread > 0 ? 'flex' : 'none';
+  }
+  if (!msgs.length) {
+    list.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:0.82rem;text-align:center;padding:20px;">Aucun message</div>';
+    return;
+  }
+  list.innerHTML = msgs.map((m, i) => `
+    <div class="msg-item" style="${!m.read ? 'border-left:3px solid var(--accent);' : ''}">
+      <div>
+        <div class="msg-text">${m.text}</div>
+        <div class="msg-from">De : ${m.from} · ${new Date(m.date).toLocaleDateString('fr-FR')}</div>
+      </div>
+      <div class="msg-actions">
+        <button class="icon-btn" style="width:30px;height:30px;font-size:0.75rem;" onclick="markRead(${i})" title="Marquer lu">✓</button>
+        <button class="icon-btn danger" style="width:30px;height:30px;font-size:0.75rem;" onclick="deleteMsg(${i})" title="Supprimer">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+function markRead(i) {
+  const msgs = getMessages();
+  if (msgs[i]) { msgs[i].read = true; saveMessages(msgs); renderAdminMessages(); }
+}
+function deleteMsg(i) {
+  const msgs = getMessages();
+  msgs.splice(i, 1);
+  saveMessages(msgs);
+  renderAdminMessages();
+}
+
+function renderUserAccounts() {
+  const users = getUsers();
+  const el = document.getElementById('userAccountsList');
+  if (!users.length) {
+    el.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:0.82rem;text-align:center;padding:14px;">Aucun compte utilisateur</div>';
+    return;
+  }
+  el.innerHTML = users.map((u, i) => `
+    <div class="msg-item">
+      <div>
+        <div class="msg-text" style="font-weight:700;">${u.name}</div>
+        <div class="msg-from">@${u.username} · Créé le ${new Date(u.createdAt).toLocaleDateString('fr-FR')}</div>
+      </div>
+      <button class="icon-btn danger" style="width:30px;height:30px;font-size:0.75rem;" onclick="deleteUserAccount(${i})" title="Supprimer">🗑️</button>
+    </div>`).join('');
+}
+
+function deleteUserAccount(i) {
+  if (!confirm('Supprimer ce compte utilisateur ?')) return;
+  const users = getUsers();
+  users.splice(i, 1);
+  saveUsers(users);
+  renderAdminPanel();
+  showToast('🗑️ Compte supprimé');
+}
+
+// ===== MESSAGES =====
+function sendAdminContact() {
+  const name = document.getElementById('contactName').value.trim();
+  const msg = document.getElementById('contactMsg').value.trim();
+  if (!name) { showToast('⚠️ Entrez votre nom'); return; }
+  const msgs = getMessages();
+  msgs.unshift({ from: name, text: msg || 'Demande de suppression de compte / problème de connexion.', date: new Date().toISOString(), read: false });
+  saveMessages(msgs);
+  closeModal('adminContactModal');
+  showToast('✅ Message envoyé à l\'administrateur');
+  document.getElementById('contactName').value = '';
+  document.getElementById('contactMsg').value = '';
+  // Update badge
+  renderAdminMessages && renderAdminMessages();
+}
+
+function sendMsg() {
+  const name = document.getElementById('msgSenderName').value.trim();
+  const content = document.getElementById('msgContent').value.trim();
+  if (!name || !content) { showToast('⚠️ Remplissez tous les champs'); return; }
+  const msgs = getMessages();
+  msgs.unshift({ from: name, text: content, date: new Date().toISOString(), read: false });
+  saveMessages(msgs);
+  closeMsgBox();
+  showToast('✅ Message envoyé');
+}
+
+function closeMsgBox() { document.getElementById('msgBox').classList.remove('open'); }
+
+// ===== NOTIFICATIONS =====
+function checkNotifications() {
+  const t = today();
+  const tomorrow = addDays(t, 1);
+  let found = false;
+
+  // Check admin employees
+  if (currentUser?.isAdmin) {
+    getEmployees().forEach(emp => {
+      const rots = calcRotations(parseDate(emp.startDate), parseDate(emp.contractEnd));
+      rots.forEach(r => {
+        if (r.restEnd && fmtDate(r.restEnd) === fmtDate(tomorrow)) {
+          showNotif(`Récupération de ${emp.name} se termine demain !`);
+          found = true;
+        }
+      });
+    });
+  } else if (currentUser?.data) {
+    const u = currentUser.data;
+    const rots = calcRotations(parseDate(u.startDate), parseDate(u.contractEnd));
+    rots.forEach(r => {
+      if (r.restEnd && fmtDate(r.restEnd) === fmtDate(tomorrow)) {
+        showNotif('Votre récupération prend fin demain !');
+        found = true;
+      }
+    });
+  }
+}
+
+function showNotif(text) {
+  document.getElementById('notifText').textContent = text;
+  document.getElementById('notifBar').classList.add('show');
+  setTimeout(closeNotif, 8000);
+}
+function closeNotif() { document.getElementById('notifBar').classList.remove('show'); }
+
+// ===== RESET =====
+function doReset() {
+  const p = document.getElementById('resetPass').value;
+  if (p !== ADMIN_PASS) { showToast('❌ Mot de passe incorrect'); return; }
+  ['imp_employees', 'imp_users', 'imp_messages'].forEach(k => localStorage.removeItem(k));
+  closeModal('resetModal');
+  currentUser = null;
+  showToast('🗑️ Toutes les données supprimées');
+  setTimeout(() => goTo('welcome'), 1000);
+}
+
+// ===== LOADING =====
+function showLoading(cb, delay = 1800) {
+  goTo('loading');
+  setTimeout(cb, delay);
+}
+
+// ===== MODAL HELPERS =====
+function openModal(id) { document.getElementById(id).classList.add('open'); }
+function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+document.querySelectorAll('.modal-overlay').forEach(o => {
+  o.addEventListener('click', e => { if (e.target === o) o.classList.remove('open'); });
+});
+
+// ===== TOAST =====
+function showToast(msg, dur = 2800) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), dur);
+}
+
+// ===== CONTRACT DATE LISTENERS =====
+document.addEventListener('DOMContentLoaded', () => {
+  const cs = document.getElementById('empContractStart');
+  const ce = document.getElementById('empContractEnd');
+  if (cs) cs.addEventListener('input', calcDuration);
+  if (ce) ce.addEventListener('input', calcDuration);
+});
+</script>
+</body>
+</html>
